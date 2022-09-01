@@ -76,7 +76,11 @@ class HomeScreen extends StatelessWidget {
             controller: _refreshController,
             onRefresh: () {
               HapticFeedback.lightImpact();
-              context.read<HomeBloc>().add(const FetchBooksData());
+              String? val;
+              if (textEditController.text.replaceAll(' ', '').isNotEmpty) {
+                val = textEditController.text;
+              }
+              context.read<HomeBloc>().add( FetchBooksData(val));
             },
             onLoading: () {
               HapticFeedback.lightImpact();
@@ -86,30 +90,44 @@ class HomeScreen extends StatelessWidget {
               }
               context.read<HomeBloc>().add(FetchMoreBooksData(searchText: val));
             },
-            child: ListView.separated(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(12),
               itemCount: state.bookList.length,
-              separatorBuilder: (BuildContext context, int index) {
-                return const Divider();
-              },
               itemBuilder: (BuildContext context, int index) {
                 Book book = state.bookList.elementAt(index);
-                return ListTile(
-                  leading: SizedBox(
-                      height: 80,
-                      width: 80,
-                      child: Image.network(
-                        book.volumeInfo!.imageLinks?.thumbnail ?? '',
+                return Container(
+                  margin: EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius:  BorderRadius.all(Radius.circular(10)) ,
+                    shape: BoxShape.rectangle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(context).focusColor.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset:  const Offset(0, 5),
+                      ),
+                    ],
+                    border: Border.all(color: Theme.of(context).focusColor.withOpacity(0.05)),
+                  ),
+                  child: ListTile(
+                    leading: SizedBox(
                         height: 80,
                         width: 80,
-                        fit: BoxFit.contain,
-                      )),
-                  title: Text(book.volumeInfo!.title ?? ''),
-                  subtitle: Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        book.volumeInfo!.subtitle ?? (book.volumeInfo!.description ?? ''),
-                        maxLines: 4,
-                      )),
+                        child: Image.network(
+                          book.volumeInfo!.imageLinks?.thumbnail ?? '',
+                          height: 80,
+                          width: 80,
+                          fit: BoxFit.contain,
+                        )),
+                    title: Text(book.volumeInfo!.title ?? ''),
+                    subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          book.volumeInfo!.subtitle ?? (book.volumeInfo!.description ?? ''),
+                          maxLines: 4,
+                        )),
+                  ),
                 );
               },
             ),
